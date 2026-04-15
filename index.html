@@ -6,55 +6,7 @@
   <title>Book Mockup Generator | Bookfunnels.io</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --bg: #f9fafb;
-      --surface: #ffffff;
-      --border: #e5e7eb;
-      --text: #111827;
-      --text-muted: #6b7280;
-      --accent: #4f7df9;
-      --accent-hover: #3b6de8;
-      --accent-glow: rgba(79, 125, 249, 0.08);
-      --success: #10b981;
-    }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-    body::before { content: ''; position: fixed; inset: 0; background: radial-gradient(ellipse at 20% 0%, rgba(79,125,249,0.04) 0%, transparent 50%), radial-gradient(ellipse at 80% 100%, rgba(79,125,249,0.03) 0%, transparent 50%); pointer-events: none; }
-    .container { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 40px 24px; }
-    .header { text-align: center; margin-bottom: 48px; }
-    .header h1 { font-size: clamp(28px, 4vw, 42px); font-weight: 700; line-height: 1.2; margin-bottom: 12px; background: linear-gradient(135deg, #111827 0%, #4f7df9 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    .header p { color: var(--text-muted); font-size: 16px; max-width: 560px; margin: 0 auto; line-height: 1.6; }
-    .steps { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; }
-    @media (max-width: 800px) { .steps { grid-template-columns: 1fr; } }
-    .step-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 28px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
-    .step-number { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 8px; background: var(--accent-glow); border: 1px solid rgba(79,125,249,0.2); color: var(--accent); font-size: 13px; font-weight: 700; margin-right: 10px; }
-    .step-title { font-size: 15px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; display: flex; align-items: center; color: var(--text); }
-    .upload-zone { border: 2px dashed var(--border); border-radius: 12px; padding: 40px 20px; text-align: center; cursor: pointer; transition: all 0.25s ease; position: relative; }
-    .upload-zone:hover, .upload-zone.dragover { border-color: var(--accent); background: var(--accent-glow); }
-    .upload-zone.has-image { padding: 16px; border-style: solid; border-color: var(--success); background: rgba(16, 185, 129, 0.04); }
-    .upload-zone .icon { width: 52px; height: 52px; margin: 0 auto 14px; border-radius: 14px; background: var(--accent-glow); display: flex; align-items: center; justify-content: center; }
-    .upload-zone .icon svg { width: 26px; height: 26px; stroke: var(--accent); }
-    .upload-zone .label { font-size: 15px; font-weight: 500; margin-bottom: 4px; color: var(--text); }
-    .upload-zone .hint { font-size: 12px; color: var(--text-muted); }
-    .upload-zone .preview-thumb { max-width: 100%; max-height: 240px; border-radius: 8px; object-fit: contain; }
-    .upload-zone .change-label { display: block; margin-top: 10px; font-size: 12px; color: var(--accent); font-weight: 500; }
-    #fileInput { display: none; }
-    .output-section { margin-top: 32px; }
-    .output-section h3 { font-size: 14px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px; }
-    .preview-card { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; text-align: center; position: relative; background-image: linear-gradient(45deg, #f0f1f3 25%, transparent 25%), linear-gradient(-45deg, #f0f1f3 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #f0f1f3 75%), linear-gradient(-45deg, transparent 75%, #f0f1f3 75%); background-size: 16px 16px; background-position: 0 0, 0 8px, 8px -8px, -8px 0px; }
-    .preview-card canvas { max-width: 100%; height: auto; border-radius: 4px; }
-    .preview-card .preview-label { position: absolute; top: 8px; left: 12px; font-size: 11px; font-weight: 600; color: var(--accent); background: var(--surface); padding: 3px 8px; border-radius: 4px; border: 1px solid var(--border); letter-spacing: 0.5px; }
-    .btn-row { display: flex; gap: 10px; margin-top: 12px; }
-    .download-btn { flex: 1; padding: 12px 16px; border: none; border-radius: 10px; background: var(--accent); color: #fff; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 6px; }
-    .download-btn:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(79,125,249,0.2); }
-    .download-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; box-shadow: none; }
-    .download-btn svg { width: 16px; height: 16px; }
-    .status-msg { text-align: center; font-size: 13px; color: var(--text-muted); margin-top: 8px; min-height: 20px; }
-    .footer { text-align: center; margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--border); }
-    .footer a { color: var(--text-muted); text-decoration: none; font-size: 13px; transition: color 0.2s; }
-    .footer a:hover { color: var(--accent); }
-    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--surface); border: 1px solid var(--success); color: var(--success); padding: 12px 24px; border-radius: 10px; font-size: 14px; font-weight: 500; z-index: 100; opacity: 0; transition: all 0.3s ease; pointer-events: none; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    :root{--bg:#f9fafb;--surface:#fff;--border:#e5e7eb;--text:#111827;--text-muted:#6b7280;--accent:#4f7df9;--accent-hover:#3b6de8;--accent-glow:rgba(79,125,249,.08);--success:#10b981}*{margin:0;padding:0;box-sizing:border-box}body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 0%,rgba(79,125,249,.04) 0%,transparent 50%),radial-gradient(ellipse at 80% 100%,rgba(79,125,249,.03) 0%,transparent 50%);pointer-events:none}.container{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:40px 24px}.header{text-align:center;margin-bottom:48px}.header h1{font-size:clamp(28px,4vw,42px);font-weight:700;line-height:1.2;margin-bottom:12px;background:linear-gradient(135deg,#111827 0%,#4f7df9 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}.header p{color:var(--text-muted);font-size:16px;max-width:560px;margin:0 auto;line-height:1.6}.steps{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start}@media(max-width:800px){.steps{grid-template-columns:1fr}}.step-panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,.04)}.step-number{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:8px;background:var(--accent-glow);border:1px solid rgba(79,125,249,.2);color:var(--accent);font-size:13px;font-weight:700;margin-right:10px}.step-title{font-size:15px;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:20px;display:flex;align-items:center;color:var(--text)}.upload-zone{border:2px dashed var(--border);border-radius:12px;padding:40px 20px;text-align:center;cursor:pointer;transition:all .25s ease;position:relative}.upload-zone:hover,.upload-zone.dragover{border-color:var(--accent);background:var(--accent-glow)}.upload-zone.has-image{padding:16px;border-style:solid;border-color:var(--success);background:rgba(16,185,129,.04)}.upload-zone .icon{width:52px;height:52px;margin:0 auto 14px;border-radius:14px;background:var(--accent-glow);display:flex;align-items:center;justify-content:center}.upload-zone .icon svg{width:26px;height:26px;stroke:var(--accent)}.upload-zone .label{font-size:15px;font-weight:500;margin-bottom:4px;color:var(--text)}.upload-zone .hint{font-size:12px;color:var(--text-muted)}.upload-zone .preview-thumb{max-width:100%;max-height:240px;border-radius:8px;object-fit:contain}.upload-zone .change-label{display:block;margin-top:10px;font-size:12px;color:var(--accent);font-weight:500}#fileInput{display:none}.output-section{margin-top:32px}.output-section h3{font-size:14px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:16px}.preview-card{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;text-align:center;position:relative;background-image:linear-gradient(45deg,#f0f1f3 25%,transparent 25%),linear-gradient(-45deg,#f0f1f3 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#f0f1f3 75%),linear-gradient(-45deg,transparent 75%,#f0f1f3 75%);background-size:16px 16px;background-position:0 0,0 8px,8px -8px,-8px 0}.preview-card canvas{max-width:100%;height:auto;border-radius:4px}.preview-card .preview-label{position:absolute;top:8px;left:12px;font-size:11px;font-weight:600;color:var(--accent);background:var(--surface);padding:3px 8px;border-radius:4px;border:1px solid var(--border);letter-spacing:.5px}.btn-row{display:flex;gap:10px;margin-top:12px}.download-btn{flex:1;padding:12px 16px;border:none;border-radius:10px;background:var(--accent);color:#fff;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s ease;display:flex;align-items:center;justify-content:center;gap:6px}.download-btn:hover{background:var(--accent-hover);transform:translateY(-1px);box-shadow:0 6px 20px rgba(79,125,249,.2)}.download-btn:disabled{opacity:.35;cursor:not-allowed;transform:none;box-shadow:none}.download-btn svg{width:16px;height:16px}.status-msg{text-align:center;font-size:13px;color:var(--text-muted);margin-top:8px;min-height:20px}.footer{text-align:center;margin-top:48px;padding-top:24px;border-top:1px solid var(--border)}.footer a{color:var(--text-muted);text-decoration:none;font-size:13px;transition:color .2s}.footer a:hover{color:var(--accent)}.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--surface);border:1px solid var(--success);color:var(--success);padding:12px 24px;border-radius:10px;font-size:14px;font-weight:500;z-index:100;opacity:0;transition:all .3s ease;pointer-events:none;box-shadow:0 4px 12px rgba(0,0,0,.08)}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
   </style>
 </head>
 <body>
@@ -76,21 +28,9 @@
       </div>
       <div class="step-panel">
         <div class="step-title"><span class="step-number">2</span> Your Mockups</div>
-        <div class="output-section">
-          <h3>Standalone 3D Book</h3>
-          <div class="preview-card"><span class="preview-label">TRANSPARENT PNG</span><canvas id="bookCanvas" width="1500" height="1899" style="display:none;"></canvas><div id="bookPlaceholder" style="padding:60px 20px; color:var(--text-muted); font-size:13px;">Upload a cover to generate</div></div>
-          <div class="btn-row"><button class="download-btn" id="dlBook" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download Book</button></div>
-        </div>
-        <div class="output-section" style="margin-top:24px;">
-          <h3>Standalone iPad</h3>
-          <div class="preview-card"><span class="preview-label">TRANSPARENT PNG</span><canvas id="ipadCanvas" width="1500" height="1749" style="display:none;"></canvas><div id="ipadPlaceholder" style="padding:50px 20px; color:var(--text-muted); font-size:13px;">Upload a cover to generate</div></div>
-          <div class="btn-row"><button class="download-btn" id="dlIpad" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download iPad</button></div>
-        </div>
-        <div class="output-section" style="margin-top:24px;">
-          <h3>Full Hero Image</h3>
-          <div class="preview-card"><span class="preview-label">TRANSPARENT PNG</span><canvas id="heroCanvas" width="1500" height="1395" style="display:none;"></canvas><div id="heroPlaceholder" style="padding:50px 20px; color:var(--text-muted); font-size:13px;">Upload a cover to generate</div></div>
-          <div class="btn-row"><button class="download-btn" id="dlHero" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download Hero</button></div>
-        </div>
+        <div class="output-section"><h3>Standalone 3D Book</h3><div class="preview-card"><span class="preview-label">TRANSPARENT PNG</span><canvas id="bookCanvas" width="1500" height="1899" style="display:none;"></canvas><div id="bookPH" style="padding:60px 20px;color:var(--text-muted);font-size:13px;">Upload a cover to generate</div></div><div class="btn-row"><button class="download-btn" id="dlBook" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download Book</button></div></div>
+        <div class="output-section" style="margin-top:24px;"><h3>Standalone iPad</h3><div class="preview-card"><span class="preview-label">TRANSPARENT PNG</span><canvas id="ipadCanvas" width="1500" height="1749" style="display:none;"></canvas><div id="ipadPH" style="padding:50px 20px;color:var(--text-muted);font-size:13px;">Upload a cover to generate</div></div><div class="btn-row"><button class="download-btn" id="dlIpad" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download iPad</button></div></div>
+        <div class="output-section" style="margin-top:24px;"><h3>Full Hero Image</h3><div class="preview-card"><span class="preview-label">TRANSPARENT PNG</span><canvas id="heroCanvas" width="1500" height="1395" style="display:none;"></canvas><div id="heroPH" style="padding:50px 20px;color:var(--text-muted);font-size:13px;">Upload a cover to generate</div></div><div class="btn-row"><button class="download-btn" id="dlHero" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download Hero</button></div></div>
       </div>
     </div>
     <div class="footer"><a href="https://bookfunnels.io" target="_blank">Powered by Bookfunnels.io</a></div>
@@ -101,72 +41,61 @@
   (function() {
     var BASE = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
 
-    var BOOK_QUAD = [[165, 39], [1361, 39], [1361, 1759], [165, 1759]];
-    var IPAD_QUAD = [[171, 64], [1320, 64], [1320, 1600], [171, 1600]];
+    var BOOK_QUAD = [[165,39],[1361,39],[1361,1759],[165,1759]];
+    var IPAD_QUAD = [[171,64],[1320,64],[1320,1600],[171,1600]];
 
+    // Hero composition - rotations negated for Canvas CW convention
     var HERO_W = 1500, HERO_H = 1395;
-    var HERO_BOOK = { cx: 520, cy: 863, scale: 0.512, rot: -10 };
-    var HERO_IPAD = { cx: 958, cy: 639, scale: 0.648, rot: 15 };
+    var HERO_BOOK = { cx:520, cy:863, scale:0.512, rot:-10 };
+    var HERO_IPAD = { cx:958, cy:639, scale:0.648, rot:15 };
 
-    var coverImg = null, templateBook = null, templateIpad = null, templateHero = null, loaded = 0;
-    var uploadZone = document.getElementById('uploadZone');
-    var fileInput = document.getElementById('fileInput');
-    var statusMsg = document.getElementById('statusMsg');
-    var bookCanvas = document.getElementById('bookCanvas');
-    var ipadCanvas = document.getElementById('ipadCanvas');
-    var heroCanvas = document.getElementById('heroCanvas');
-    var bookPH = document.getElementById('bookPlaceholder');
-    var ipadPH = document.getElementById('ipadPlaceholder');
-    var heroPH = document.getElementById('heroPlaceholder');
-    var dlBook = document.getElementById('dlBook');
-    var dlIpad = document.getElementById('dlIpad');
-    var dlHero = document.getElementById('dlHero');
-    var toast = document.getElementById('toast');
+    var coverImg=null, templateBook=null, templateIpad=null;
+    var heroShadow=null, heroAirpods=null;
+    var loaded=0, TOTAL=4;
 
-    statusMsg.textContent = 'Loading templates...';
+    var uploadZone=document.getElementById('uploadZone'), fileInput=document.getElementById('fileInput');
+    var statusMsg=document.getElementById('statusMsg');
+    var bookCanvas=document.getElementById('bookCanvas'), ipadCanvas=document.getElementById('ipadCanvas'), heroCanvas=document.getElementById('heroCanvas');
+    var bookPH=document.getElementById('bookPH'), ipadPH=document.getElementById('ipadPH'), heroPH=document.getElementById('heroPH');
+    var dlBook=document.getElementById('dlBook'), dlIpad=document.getElementById('dlIpad'), dlHero=document.getElementById('dlHero');
+    var toast=document.getElementById('toast');
 
-    function loadImg(url, cb) {
-      var img = new Image(); img.crossOrigin = 'anonymous';
-      img.onload = function() { cb(img); };
-      img.onerror = function() { statusMsg.textContent = 'Failed to load ' + url.split('/').pop(); statusMsg.style.color = '#ef4444'; };
-      img.src = url;
-    }
-    function onLoaded() { loaded++; if (loaded === 3) { statusMsg.textContent = 'Templates loaded. Upload your cover!'; statusMsg.style.color = 'var(--success)'; setTimeout(function() { statusMsg.textContent = ''; }, 2000); } }
+    statusMsg.textContent='Loading templates...';
 
-    loadImg(BASE + 'template-book.png', function(i) { templateBook = i; onLoaded(); });
-    loadImg(BASE + 'template-ipad.png', function(i) { templateIpad = i; onLoaded(); });
-    loadImg(BASE + 'template-hero.png', function(i) { templateHero = i; onLoaded(); });
+    function loadImg(url,cb){var img=new Image();img.crossOrigin='anonymous';img.onload=function(){cb(img);};img.onerror=function(){statusMsg.textContent='Failed to load '+url.split('/').pop();statusMsg.style.color='#ef4444';};img.src=url;}
+    function onLoaded(){loaded++;if(loaded===TOTAL){statusMsg.textContent='Templates loaded. Upload your cover!';statusMsg.style.color='var(--success)';setTimeout(function(){statusMsg.textContent='';},2000);}}
 
-    uploadZone.addEventListener('click', function() { fileInput.click(); });
-    uploadZone.addEventListener('dragover', function(e) { e.preventDefault(); uploadZone.classList.add('dragover'); });
-    uploadZone.addEventListener('dragleave', function() { uploadZone.classList.remove('dragover'); });
-    uploadZone.addEventListener('drop', function(e) { e.preventDefault(); uploadZone.classList.remove('dragover'); var f = e.dataTransfer.files[0]; if (f && f.type.startsWith('image/')) handleFile(f); });
-    fileInput.addEventListener('change', function(e) { if (e.target.files[0]) handleFile(e.target.files[0]); });
+    loadImg(BASE+'template-book.png',function(i){templateBook=i;onLoaded();});
+    loadImg(BASE+'template-ipad.png',function(i){templateIpad=i;onLoaded();});
+    loadImg(BASE+'hero-shadow-book.png',function(i){heroShadow=i;onLoaded();});
+    loadImg(BASE+'hero-airpods.png',function(i){heroAirpods=i;onLoaded();});
 
-    function handleFile(file) {
-      var reader = new FileReader();
-      reader.onload = function(e) {
-        var img = new Image();
-        img.onload = function() {
-          coverImg = img;
+    uploadZone.addEventListener('click',function(){fileInput.click();});
+    uploadZone.addEventListener('dragover',function(e){e.preventDefault();uploadZone.classList.add('dragover');});
+    uploadZone.addEventListener('dragleave',function(){uploadZone.classList.remove('dragover');});
+    uploadZone.addEventListener('drop',function(e){e.preventDefault();uploadZone.classList.remove('dragover');var f=e.dataTransfer.files[0];if(f&&f.type.startsWith('image/'))handleFile(f);});
+    fileInput.addEventListener('change',function(e){if(e.target.files[0])handleFile(e.target.files[0]);});
+
+    function handleFile(file){
+      var reader=new FileReader();
+      reader.onload=function(e){
+        var img=new Image();
+        img.onload=function(){
+          coverImg=img;
           uploadZone.classList.add('has-image');
-          uploadZone.innerHTML = '<img src="' + e.target.result + '" class="preview-thumb" alt="Your cover"><span class="change-label">Click to change</span>';
+          uploadZone.innerHTML='<img src="'+e.target.result+'" class="preview-thumb" alt="Your cover"><span class="change-label">Click to change</span>';
           generateAll();
         };
-        img.src = e.target.result;
+        img.src=e.target.result;
       };
       reader.readAsDataURL(file);
     }
 
-    function warp(ctx, img, quad) {
-      var N = 12;
-      for (var i = 0; i < N; i++) for (var j = 0; j < N; j++) {
-        var u0=i/N, u1=(i+1)/N, v0=j/N, v1=(j+1)/N;
-        function lq(u,v) {
-          var tx=quad[0][0]+(quad[1][0]-quad[0][0])*u, ty=quad[0][1]+(quad[1][1]-quad[0][1])*u;
-          var bx=quad[3][0]+(quad[2][0]-quad[3][0])*u, by=quad[3][1]+(quad[2][1]-quad[3][1])*u;
-          return {x:tx+(bx-tx)*v, y:ty+(by-ty)*v};
-        }
+    function warp(ctx,img,quad){
+      var N=12;
+      for(var i=0;i<N;i++)for(var j=0;j<N;j++){
+        var u0=i/N,u1=(i+1)/N,v0=j/N,v1=(j+1)/N;
+        function lq(u,v){var tx=quad[0][0]+(quad[1][0]-quad[0][0])*u,ty=quad[0][1]+(quad[1][1]-quad[0][1])*u,bx=quad[3][0]+(quad[2][0]-quad[3][0])*u,by=quad[3][1]+(quad[2][1]-quad[3][1])*u;return{x:tx+(bx-tx)*v,y:ty+(by-ty)*v};}
         var p00=lq(u0,v0),p10=lq(u1,v0),p11=lq(u1,v1),p01=lq(u0,v1);
         var sx=u0*img.width,sy=v0*img.height,sw=(u1-u0)*img.width,sh=(v1-v0)*img.height;
         tri(ctx,img,sx,sy,sx+sw,sy,sx,sy+sh,p00.x,p00.y,p10.x,p10.y,p01.x,p01.y);
@@ -174,51 +103,53 @@
       }
     }
 
-    function tri(ctx,img,sx0,sy0,sx1,sy1,sx2,sy2,dx0,dy0,dx1,dy1,dx2,dy2) {
-      ctx.save(); ctx.beginPath(); ctx.moveTo(dx0,dy0); ctx.lineTo(dx1,dy1); ctx.lineTo(dx2,dy2); ctx.closePath(); ctx.clip();
-      var d=sx0*(sy1-sy2)+sx1*(sy2-sy0)+sx2*(sy0-sy1); if(Math.abs(d)<.001){ctx.restore();return;}
+    function tri(ctx,img,sx0,sy0,sx1,sy1,sx2,sy2,dx0,dy0,dx1,dy1,dx2,dy2){
+      ctx.save();ctx.beginPath();ctx.moveTo(dx0,dy0);ctx.lineTo(dx1,dy1);ctx.lineTo(dx2,dy2);ctx.closePath();ctx.clip();
+      var d=sx0*(sy1-sy2)+sx1*(sy2-sy0)+sx2*(sy0-sy1);if(Math.abs(d)<.001){ctx.restore();return;}
       ctx.transform((dx0*(sy1-sy2)+dx1*(sy2-sy0)+dx2*(sy0-sy1))/d,(dy0*(sy1-sy2)+dy1*(sy2-sy0)+dy2*(sy0-sy1))/d,(dx0*(sx2-sx1)+dx1*(sx0-sx2)+dx2*(sx1-sx0))/d,(dy0*(sx2-sx1)+dy1*(sx0-sx2)+dy2*(sx1-sx0))/d,(dx0*(sx1*sy2-sx2*sy1)+dx1*(sx2*sy0-sx0*sy2)+dx2*(sx0*sy1-sx1*sy0))/d,(dy0*(sx1*sy2-sx2*sy1)+dy1*(sx2*sy0-sx0*sy2)+dy2*(sx0*sy1-sx1*sy0))/d);
-      ctx.drawImage(img,0,0); ctx.restore();
+      ctx.drawImage(img,0,0);ctx.restore();
     }
 
-    function cutQuad(ctx,quad) {
-      ctx.save(); ctx.globalCompositeOperation='destination-out';
-      ctx.beginPath(); ctx.moveTo(quad[0][0],quad[0][1]); ctx.lineTo(quad[1][0],quad[1][1]); ctx.lineTo(quad[2][0],quad[2][1]); ctx.lineTo(quad[3][0],quad[3][1]); ctx.closePath();
-      ctx.fillStyle='rgba(0,0,0,1)'; ctx.fill(); ctx.restore();
+    function cutQuad(ctx,quad){
+      ctx.save();ctx.globalCompositeOperation='destination-out';
+      ctx.beginPath();ctx.moveTo(quad[0][0],quad[0][1]);ctx.lineTo(quad[1][0],quad[1][1]);ctx.lineTo(quad[2][0],quad[2][1]);ctx.lineTo(quad[3][0],quad[3][1]);ctx.closePath();
+      ctx.fillStyle='rgba(0,0,0,1)';ctx.fill();ctx.restore();
     }
 
-    function generateAll() {
-      if (!coverImg||!templateBook||!templateIpad||!templateHero) { statusMsg.textContent='Waiting for templates...'; return; }
+    function generateAll(){
+      if(!coverImg||!templateBook||!templateIpad||!heroShadow||!heroAirpods){statusMsg.textContent='Waiting for templates...';return;}
       statusMsg.textContent='Generating mockups...';
-      requestAnimationFrame(function() {
-        genBook(); genIpad(); genHero();
+      requestAnimationFrame(function(){
+        genBook();genIpad();genHero();
         statusMsg.textContent='';
-        dlBook.disabled=false; dlIpad.disabled=false; dlHero.disabled=false;
+        dlBook.disabled=false;dlIpad.disabled=false;dlHero.disabled=false;
       });
     }
 
-    function genBook() {
+    function genBook(){
       var c=bookCanvas,ctx=c.getContext('2d'),w=c.width,h=c.height;
-      ctx.clearRect(0,0,w,h); warp(ctx,coverImg,BOOK_QUAD);
-      var t=document.createElement('canvas'); t.width=w; t.height=h;
-      var tc=t.getContext('2d'); tc.drawImage(templateBook,0,0,w,h); cutQuad(tc,BOOK_QUAD);
+      ctx.clearRect(0,0,w,h);warp(ctx,coverImg,BOOK_QUAD);
+      var t=document.createElement('canvas');t.width=w;t.height=h;
+      var tc=t.getContext('2d');tc.drawImage(templateBook,0,0,w,h);cutQuad(tc,BOOK_QUAD);
       ctx.drawImage(t,0,0);
-      c.style.display='block'; bookPH.style.display='none';
+      c.style.display='block';bookPH.style.display='none';
     }
 
-    function genIpad() {
+    function genIpad(){
       var c=ipadCanvas,ctx=c.getContext('2d'),w=c.width,h=c.height;
-      ctx.clearRect(0,0,w,h); warp(ctx,coverImg,IPAD_QUAD);
-      var t=document.createElement('canvas'); t.width=w; t.height=h;
-      var tc=t.getContext('2d'); tc.drawImage(templateIpad,0,0,w,h); cutQuad(tc,IPAD_QUAD);
+      ctx.clearRect(0,0,w,h);warp(ctx,coverImg,IPAD_QUAD);
+      var t=document.createElement('canvas');t.width=w;t.height=h;
+      var tc=t.getContext('2d');tc.drawImage(templateIpad,0,0,w,h);cutQuad(tc,IPAD_QUAD);
       ctx.drawImage(t,0,0);
-      c.style.display='block'; ipadPH.style.display='none';
+      c.style.display='block';ipadPH.style.display='none';
     }
 
-    function genHero() {
+    function genHero(){
       var c=heroCanvas,ctx=c.getContext('2d');
       ctx.clearRect(0,0,HERO_W,HERO_H);
 
+      // CORRECT LAYER ORDER (matching PSD):
+      // 1. iPad mockup (furthest back)
       ctx.save();
       ctx.translate(HERO_IPAD.cx,HERO_IPAD.cy);
       ctx.rotate(HERO_IPAD.rot*Math.PI/180);
@@ -226,6 +157,10 @@
       ctx.drawImage(ipadCanvas,-ipadCanvas.width/2,-ipadCanvas.height/2);
       ctx.restore();
 
+      // 2. Book shadow (between iPad and book)
+      ctx.drawImage(heroShadow,0,0,HERO_W,HERO_H);
+
+      // 3. Book mockup (in front of shadow)
       ctx.save();
       ctx.translate(HERO_BOOK.cx,HERO_BOOK.cy);
       ctx.rotate(HERO_BOOK.rot*Math.PI/180);
@@ -233,18 +168,19 @@
       ctx.drawImage(bookCanvas,-bookCanvas.width/2,-bookCanvas.height/2);
       ctx.restore();
 
-      ctx.drawImage(templateHero,0,0,HERO_W,HERO_H);
+      // 4. AirPods + shadow (on top of everything)
+      ctx.drawImage(heroAirpods,0,0,HERO_W,HERO_H);
 
-      c.style.display='block'; heroPH.style.display='none';
+      c.style.display='block';heroPH.style.display='none';
     }
 
     dlBook.addEventListener('click',function(){dl(bookCanvas,'book-mockup-3d.png');});
     dlIpad.addEventListener('click',function(){dl(ipadCanvas,'ipad-mockup.png');});
     dlHero.addEventListener('click',function(){dl(heroCanvas,'hero-image.png');});
 
-    function dl(canvas,name) {
-      var a=document.createElement('a'); a.download=name; a.href=canvas.toDataURL('image/png'); a.click();
-      toast.textContent='Downloaded '+name; toast.classList.add('show');
+    function dl(canvas,name){
+      var a=document.createElement('a');a.download=name;a.href=canvas.toDataURL('image/png');a.click();
+      toast.textContent='Downloaded '+name;toast.classList.add('show');
       setTimeout(function(){toast.classList.remove('show');},2500);
     }
   })();
