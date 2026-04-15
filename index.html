@@ -42,9 +42,13 @@
     var BASE = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
 
     var BOOK_QUAD = [[165,39],[1361,39],[1361,1759],[165,1759]];
-    var IPAD_QUAD = [[171,64],[1320,64],[1320,1600],[171,1600]];
 
-    // Hero composition - rotations negated for Canvas CW convention
+    // iPad screen quad - pulled bottom up further to 1585, tightened for bezel
+    var IPAD_QUAD = [[171,64],[1320,64],[1320,1585],[171,1585]];
+
+    // Border radius for the iPad screen (mimics real iPad rounded screen corners)
+    var IPAD_SCREEN_RADIUS = 8;
+
     var HERO_W = 1500, HERO_H = 1395;
     var HERO_BOOK = { cx:520, cy:863, scale:0.512, rot:-10 };
     var HERO_IPAD = { cx:958, cy:639, scale:0.648, rot:15 };
@@ -91,6 +95,21 @@
       reader.readAsDataURL(file);
     }
 
+    // Draw a rounded rectangle path
+    function roundedRect(ctx, x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + w - r, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+      ctx.lineTo(x + w, y + h - r);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      ctx.lineTo(x + r, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.closePath();
+    }
+
     function warp(ctx,img,quad){
       var N=12;
       for(var i=0;i<N;i++)for(var j=0;j<N;j++){
@@ -116,6 +135,29 @@
       ctx.fillStyle='rgba(0,0,0,1)';ctx.fill();ctx.restore();
     }
 
+    // Cut a rounded-rect quad from the canvas
+    function cutQuadRounded(ctx, quad, radius) {
+      var x = quad[0][0], y = quad[0][1];
+      var w = quad[1][0] - quad[0][0], h = quad[2][1] - quad[1][1];
+      ctx.save();
+      ctx.globalCompositeOperation = 'destination-out';
+      roundedRect(ctx, x, y, w, h, radius);
+      ctx.fillStyle = 'rgba(0,0,0,1)';
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // Warp image into a quad, clipped to a rounded rectangle
+    function warpRounded(ctx, img, quad, radius) {
+      ctx.save();
+      var x = quad[0][0], y = quad[0][1];
+      var w = quad[1][0] - quad[0][0], h = quad[2][1] - quad[1][1];
+      roundedRect(ctx, x, y, w, h, radius);
+      ctx.clip();
+      warp(ctx, img, quad);
+      ctx.restore();
+    }
+
     function generateAll(){
       if(!coverImg||!templateBook||!templateIpad||!heroShadow||!heroAirpods){statusMsg.textContent='Waiting for templates...';return;}
       statusMsg.textContent='Generating mockups...';
@@ -137,10 +179,17 @@
 
     function genIpad(){
       var c=ipadCanvas,ctx=c.getContext('2d'),w=c.width,h=c.height;
-      ctx.clearRect(0,0,w,h);warp(ctx,coverImg,IPAD_QUAD);
+      ctx.clearRect(0,0,w,h);
+
+      // Warp cover with rounded corners to match iPad screen shape
+      warpRounded(ctx,coverImg,IPAD_QUAD,IPAD_SCREEN_RADIUS);
+
+      // Template with rounded-rect quad cut out
       var t=document.createElement('canvas');t.width=w;t.height=h;
-      var tc=t.getContext('2d');tc.drawImage(templateIpad,0,0,w,h);cutQuad(tc,IPAD_QUAD);
+      var tc=t.getContext('2d');tc.drawImage(templateIpad,0,0,w,h);
+      cutQuadRounded(tc,IPAD_QUAD,IPAD_SCREEN_RADIUS);
       ctx.drawImage(t,0,0);
+
       c.style.display='block';ipadPH.style.display='none';
     }
 
@@ -148,8 +197,7 @@
       var c=heroCanvas,ctx=c.getContext('2d');
       ctx.clearRect(0,0,HERO_W,HERO_H);
 
-      // CORRECT LAYER ORDER (matching PSD):
-      // 1. iPad mockup (furthest back)
+      // 1. iPad mockup (back)
       ctx.save();
       ctx.translate(HERO_IPAD.cx,HERO_IPAD.cy);
       ctx.rotate(HERO_IPAD.rot*Math.PI/180);
@@ -160,7 +208,7 @@
       // 2. Book shadow (between iPad and book)
       ctx.drawImage(heroShadow,0,0,HERO_W,HERO_H);
 
-      // 3. Book mockup (in front of shadow)
+      // 3. Book mockup (front)
       ctx.save();
       ctx.translate(HERO_BOOK.cx,HERO_BOOK.cy);
       ctx.rotate(HERO_BOOK.rot*Math.PI/180);
@@ -168,7 +216,7 @@
       ctx.drawImage(bookCanvas,-bookCanvas.width/2,-bookCanvas.height/2);
       ctx.restore();
 
-      // 4. AirPods + shadow (on top of everything)
+      // 4. AirPods + shadow (top)
       ctx.drawImage(heroAirpods,0,0,HERO_W,HERO_H);
 
       c.style.display='block';heroPH.style.display='none';
