@@ -1,0 +1,703 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book Mockup Generator | Bookfunnels.io</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0b0f;
+    --surface: #13141a;
+    --border: #2a2b35;
+    --text: #e8e9ed;
+    --text-muted: #8b8d9a;
+    --accent: #4f7df9;
+    --accent-hover: #6b93ff;
+    --accent-glow: rgba(79, 125, 249, 0.15);
+    --success: #34d399;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 20% 0%, rgba(79,125,249,0.06) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 100%, rgba(79,125,249,0.04) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 24px;
+  }
+  .header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+  .badge {
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 100px;
+    background: var(--accent-glow);
+    border: 1px solid rgba(79,125,249,0.25);
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    margin-bottom: 20px;
+  }
+  .header h1 {
+    font-size: clamp(28px, 4vw, 42px);
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 12px;
+    background: linear-gradient(135deg, #fff 0%, #a0b4e8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .header p {
+    color: var(--text-muted);
+    font-size: 16px;
+    max-width: 560px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* Steps layout */
+  .steps {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    align-items: start;
+  }
+  @media (max-width: 800px) {
+    .steps { grid-template-columns: 1fr; }
+  }
+
+  .step-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+  }
+  .step-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: var(--accent-glow);
+    border: 1px solid rgba(79,125,249,0.3);
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 700;
+    margin-right: 10px;
+  }
+  .step-title {
+    font-size: 15px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+  }
+
+  /* Upload zone */
+  .upload-zone {
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    padding: 40px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    position: relative;
+  }
+  .upload-zone:hover, .upload-zone.dragover {
+    border-color: var(--accent);
+    background: var(--accent-glow);
+  }
+  .upload-zone.has-image {
+    padding: 16px;
+    border-style: solid;
+    border-color: var(--success);
+    background: rgba(52, 211, 153, 0.05);
+  }
+  .upload-zone .icon {
+    width: 52px; height: 52px;
+    margin: 0 auto 14px;
+    border-radius: 14px;
+    background: var(--accent-glow);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .upload-zone .icon svg { width: 26px; height: 26px; stroke: var(--accent); }
+  .upload-zone .label { font-size: 15px; font-weight: 500; margin-bottom: 4px; }
+  .upload-zone .hint { font-size: 12px; color: var(--text-muted); }
+  .upload-zone .preview-thumb {
+    max-width: 100%; max-height: 240px; border-radius: 8px; object-fit: contain;
+  }
+  .upload-zone .change-label {
+    display: block; margin-top: 10px; font-size: 12px; color: var(--accent); font-weight: 500;
+  }
+  #fileInput { display: none; }
+
+  /* Preview outputs */
+  .output-section {
+    margin-top: 32px;
+  }
+  .output-section h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 16px;
+  }
+  .preview-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+    text-align: center;
+    position: relative;
+    /* Checkerboard for transparency */
+    background-image:
+      linear-gradient(45deg, #141520 25%, transparent 25%),
+      linear-gradient(-45deg, #141520 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #141520 75%),
+      linear-gradient(-45deg, transparent 75%, #141520 75%);
+    background-size: 16px 16px;
+    background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+  }
+  .preview-card canvas {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+  }
+  .preview-card .preview-label {
+    position: absolute;
+    top: 8px; left: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--surface);
+    padding: 3px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    letter-spacing: 0.5px;
+  }
+
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+  }
+  .download-btn {
+    flex: 1;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 10px;
+    background: var(--accent);
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .download-btn:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(79,125,249,0.3);
+  }
+  .download-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+  .download-btn svg { width: 16px; height: 16px; }
+
+  .loading-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(10,11,15,0.85);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+  }
+  .spinner {
+    width: 32px; height: 32px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .status-msg {
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 8px;
+    min-height: 20px;
+  }
+
+  .footer {
+    text-align: center;
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+  .footer a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 13px;
+    transition: color 0.2s;
+  }
+  .footer a:hover { color: var(--accent); }
+
+  .toast {
+    position: fixed;
+    bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--surface);
+    border: 1px solid var(--success);
+    color: var(--success);
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 100;
+    opacity: 0;
+    transition: all 0.3s ease;
+    pointer-events: none;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <div class="badge">Free Tool</div>
+    <h1>3D Book Mockup Generator</h1>
+    <p>Upload your book cover and instantly generate a professional 3D mockup and hero image for your sales page.</p>
+  </div>
+
+  <div class="steps">
+    <!-- Left: Upload -->
+    <div class="step-panel">
+      <div class="step-title">
+        <span class="step-number">1</span> Upload Your Cover
+      </div>
+
+      <div class="upload-zone" id="uploadZone">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+        </div>
+        <div class="label">Drop your book cover here</div>
+        <div class="hint">PNG or JPG, any size. A flat front cover works best.</div>
+      </div>
+      <input type="file" id="fileInput" accept="image/png,image/jpeg,image/webp">
+
+      <div class="status-msg" id="statusMsg"></div>
+    </div>
+
+    <!-- Right: Output -->
+    <div class="step-panel">
+      <div class="step-title">
+        <span class="step-number">2</span> Your Mockups
+      </div>
+
+      <div class="output-section">
+        <h3>Standalone 3D Book</h3>
+        <div class="preview-card" id="bookPreviewCard">
+          <span class="preview-label">TRANSPARENT PNG</span>
+          <canvas id="bookCanvas" width="1500" height="1899" style="display:none;"></canvas>
+          <div id="bookPlaceholder" style="padding:60px 20px; color:var(--text-muted); font-size:13px;">Upload a cover to generate</div>
+        </div>
+        <div class="btn-row">
+          <button class="download-btn" id="dlBook" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Download Book
+          </button>
+        </div>
+      </div>
+
+      <div class="output-section" style="margin-top:24px;">
+        <h3>Full Hero Image</h3>
+        <div class="preview-card" id="heroPreviewCard">
+          <span class="preview-label">TRANSPARENT PNG</span>
+          <canvas id="heroCanvas" width="1500" height="1395" style="display:none;"></canvas>
+          <div id="heroPlaceholder" style="padding:50px 20px; color:var(--text-muted); font-size:13px;">Upload a cover to generate</div>
+        </div>
+        <div class="btn-row">
+          <button class="download-btn" id="dlHero" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Download Hero
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <a href="https://bookfunnels.io" target="_blank">Powered by Bookfunnels.io</a>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function() {
+  // Template URLs (hosted on GitHub Pages alongside this file)
+  // Resolve relative to the current page location
+  const BASE = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
+  const TEMPLATE_BOOK_URL = BASE + 'template-book.png';
+  const TEMPLATE_HERO_URL = BASE + 'template-hero.png';
+
+  // Cover face quad coordinates on each template (TL, TR, BR, BL)
+  // These define where the user's cover gets composited
+
+  // Standalone book (pb13) - cover face excluding spine
+  const BOOK_QUAD = [
+    [165, 39],    // TL
+    [1361, 39],   // TR
+    [1361, 1759], // BR
+    [165, 1759]   // BL
+  ];
+
+  // Hero image - book face
+  const HERO_BOOK_QUAD = [
+    [205, 455],   // TL
+    [718, 368],   // TR
+    [778, 1235],  // BR
+    [272, 1328]   // BL
+  ];
+
+  // Hero image - iPad screen
+  const HERO_IPAD_QUAD = [
+    [665, 135],   // TL
+    [1365, 178],  // TR
+    [1255, 1190], // BR
+    [548, 1148]   // BL
+  ];
+
+  // State
+  let coverImg = null;
+  let templateBook = null;
+  let templateHero = null;
+  let templatesLoaded = 0;
+
+  // Elements
+  const uploadZone = document.getElementById('uploadZone');
+  const fileInput = document.getElementById('fileInput');
+  const statusMsg = document.getElementById('statusMsg');
+  const bookCanvas = document.getElementById('bookCanvas');
+  const heroCanvas = document.getElementById('heroCanvas');
+  const bookPlaceholder = document.getElementById('bookPlaceholder');
+  const heroPlaceholder = document.getElementById('heroPlaceholder');
+  const dlBook = document.getElementById('dlBook');
+  const dlHero = document.getElementById('dlHero');
+  const toast = document.getElementById('toast');
+
+  // Load templates on page load
+  statusMsg.textContent = 'Loading templates...';
+
+  function loadTemplate(url, callback) {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => callback(img);
+    img.onerror = () => {
+      statusMsg.textContent = 'Failed to load template. Check CDN URLs.';
+      statusMsg.style.color = '#f87171';
+    };
+    img.src = url;
+  }
+
+  loadTemplate(TEMPLATE_BOOK_URL, (img) => {
+    templateBook = img;
+    templatesLoaded++;
+    if (templatesLoaded === 2) {
+      statusMsg.textContent = 'Templates loaded. Upload your cover!';
+      statusMsg.style.color = 'var(--success)';
+      setTimeout(() => { statusMsg.textContent = ''; }, 2000);
+    }
+  });
+
+  loadTemplate(TEMPLATE_HERO_URL, (img) => {
+    templateHero = img;
+    templatesLoaded++;
+    if (templatesLoaded === 2) {
+      statusMsg.textContent = 'Templates loaded. Upload your cover!';
+      statusMsg.style.color = 'var(--success)';
+      setTimeout(() => { statusMsg.textContent = ''; }, 2000);
+    }
+  });
+
+  // Upload handling
+  uploadZone.addEventListener('click', () => fileInput.click());
+  uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+  uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+  uploadZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadZone.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) handleFile(file);
+  });
+  fileInput.addEventListener('change', (e) => {
+    if (e.target.files[0]) handleFile(e.target.files[0]);
+  });
+
+  function handleFile(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        coverImg = img;
+        uploadZone.classList.add('has-image');
+        uploadZone.innerHTML = `
+          <img src="${e.target.result}" class="preview-thumb" alt="Your cover">
+          <span class="change-label">Click to change</span>
+        `;
+        generateMockups();
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // ========================
+  // PERSPECTIVE WARP ENGINE
+  // ========================
+
+  // Draw an image warped into a quadrilateral using triangulated texture mapping
+  function drawWarpedImage(ctx, img, quad, feather) {
+    // quad = [[x0,y0], [x1,y1], [x2,y2], [x3,y3]] = TL, TR, BR, BL
+    const subdivisions = 12;
+
+    for (let i = 0; i < subdivisions; i++) {
+      for (let j = 0; j < subdivisions; j++) {
+        const u0 = i / subdivisions;
+        const u1 = (i + 1) / subdivisions;
+        const v0 = j / subdivisions;
+        const v1 = (j + 1) / subdivisions;
+
+        // Bilinear interpolation of quad corners
+        function lerpQuad(u, v) {
+          const top = {
+            x: quad[0][0] + (quad[1][0] - quad[0][0]) * u,
+            y: quad[0][1] + (quad[1][1] - quad[0][1]) * u
+          };
+          const bot = {
+            x: quad[3][0] + (quad[2][0] - quad[3][0]) * u,
+            y: quad[3][1] + (quad[2][1] - quad[3][1]) * u
+          };
+          return {
+            x: top.x + (bot.x - top.x) * v,
+            y: top.y + (bot.y - top.y) * v
+          };
+        }
+
+        const p00 = lerpQuad(u0, v0);
+        const p10 = lerpQuad(u1, v0);
+        const p11 = lerpQuad(u1, v1);
+        const p01 = lerpQuad(u0, v1);
+
+        // Source rectangle from image
+        const sx = u0 * img.width;
+        const sy = v0 * img.height;
+        const sw = (u1 - u0) * img.width;
+        const sh = (v1 - v0) * img.height;
+
+        // Draw two triangles
+        drawTriTex(ctx, img, sx, sy, sx + sw, sy, sx, sy + sh, p00.x, p00.y, p10.x, p10.y, p01.x, p01.y);
+        drawTriTex(ctx, img, sx + sw, sy, sx + sw, sy + sh, sx, sy + sh, p10.x, p10.y, p11.x, p11.y, p01.x, p01.y);
+      }
+    }
+  }
+
+  function drawTriTex(ctx, img, sx0, sy0, sx1, sy1, sx2, sy2, dx0, dy0, dx1, dy1, dx2, dy2) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(dx0, dy0);
+    ctx.lineTo(dx1, dy1);
+    ctx.lineTo(dx2, dy2);
+    ctx.closePath();
+    ctx.clip();
+
+    const denom = (sx0 * (sy1 - sy2) + sx1 * (sy2 - sy0) + sx2 * (sy0 - sy1));
+    if (Math.abs(denom) < 0.001) { ctx.restore(); return; }
+
+    const m11 = (dx0 * (sy1 - sy2) + dx1 * (sy2 - sy0) + dx2 * (sy0 - sy1)) / denom;
+    const m12 = (dx0 * (sx2 - sx1) + dx1 * (sx0 - sx2) + dx2 * (sx1 - sx0)) / denom;
+    const m13 = (dx0 * (sx1*sy2 - sx2*sy1) + dx1 * (sx2*sy0 - sx0*sy2) + dx2 * (sx0*sy1 - sx1*sy0)) / denom;
+    const m21 = (dy0 * (sy1 - sy2) + dy1 * (sy2 - sy0) + dy2 * (sy0 - sy1)) / denom;
+    const m22 = (dy0 * (sx2 - sx1) + dy1 * (sx0 - sx2) + dy2 * (sx1 - sx0)) / denom;
+    const m23 = (dy0 * (sx1*sy2 - sx2*sy1) + dy1 * (sx2*sy0 - sx0*sy2) + dy2 * (sx0*sy1 - sx1*sy0)) / denom;
+
+    ctx.transform(m11, m21, m12, m22, m13, m23);
+    ctx.drawImage(img, 0, 0);
+    ctx.restore();
+  }
+
+  // Clear a quadrilateral region on a canvas (make it transparent)
+  function clearQuad(ctx, quad) {
+    ctx.save();
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.beginPath();
+    ctx.moveTo(quad[0][0], quad[0][1]);
+    ctx.lineTo(quad[1][0], quad[1][1]);
+    ctx.lineTo(quad[2][0], quad[2][1]);
+    ctx.lineTo(quad[3][0], quad[3][1]);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(0,0,0,1)';
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // ========================
+  // GENERATE MOCKUPS
+  // ========================
+
+  function generateMockups() {
+    if (!coverImg || !templateBook || !templateHero) {
+      statusMsg.textContent = 'Waiting for templates to load...';
+      return;
+    }
+
+    statusMsg.textContent = 'Generating mockups...';
+
+    // Use requestAnimationFrame to allow UI to update
+    requestAnimationFrame(() => {
+      generateBookMockup();
+      generateHeroMockup();
+      statusMsg.textContent = '';
+      dlBook.disabled = false;
+      dlHero.disabled = false;
+    });
+  }
+
+  function generateBookMockup() {
+    const ctx = bookCanvas.getContext('2d');
+    const w = bookCanvas.width;
+    const h = bookCanvas.height;
+    ctx.clearRect(0, 0, w, h);
+
+    // Step 1: Draw the user's cover warped into the book face quad
+    drawWarpedImage(ctx, coverImg, BOOK_QUAD);
+
+    // Step 2: Draw the template on top, but first cut out the cover face area
+    // We use an offscreen canvas for the template with the quad removed
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = w;
+    tempCanvas.height = h;
+    const tempCtx = tempCanvas.getContext('2d');
+    tempCtx.drawImage(templateBook, 0, 0, w, h);
+    clearQuad(tempCtx, BOOK_QUAD);
+
+    // Step 3: Composite the cut template on top of the warped cover
+    ctx.drawImage(tempCanvas, 0, 0);
+
+    // Show canvas
+    bookCanvas.style.display = 'block';
+    bookPlaceholder.style.display = 'none';
+  }
+
+  function generateHeroMockup() {
+    const ctx = heroCanvas.getContext('2d');
+    const w = heroCanvas.width;
+    const h = heroCanvas.height;
+    ctx.clearRect(0, 0, w, h);
+
+    // The hero has two regions: iPad screen (behind the book) and book face (in front)
+    // Compositing order:
+    // 1. Draw cover warped to iPad screen quad
+    // 2. Draw cover warped to book face quad (this goes on top of iPad area where they overlap)
+    // 3. Draw template with both quads cut out, on top of everything
+
+    // Step 1: Warp cover into iPad screen
+    drawWarpedImage(ctx, coverImg, HERO_IPAD_QUAD);
+
+    // Step 2: Warp cover into book face
+    drawWarpedImage(ctx, coverImg, HERO_BOOK_QUAD);
+
+    // Step 3: Template with both quads cut out
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = w;
+    tempCanvas.height = h;
+    const tempCtx = tempCanvas.getContext('2d');
+    tempCtx.drawImage(templateHero, 0, 0, w, h);
+    clearQuad(tempCtx, HERO_BOOK_QUAD);
+    clearQuad(tempCtx, HERO_IPAD_QUAD);
+
+    // Step 4: Composite
+    ctx.drawImage(tempCanvas, 0, 0);
+
+    heroCanvas.style.display = 'block';
+    heroPlaceholder.style.display = 'none';
+  }
+
+  // Download handlers
+  dlBook.addEventListener('click', () => {
+    downloadCanvas(bookCanvas, 'book-mockup-3d.png');
+  });
+
+  dlHero.addEventListener('click', () => {
+    downloadCanvas(heroCanvas, 'hero-image.png');
+  });
+
+  function downloadCanvas(canvas, filename) {
+    const link = document.createElement('a');
+    link.download = filename;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    showToast('Downloaded ' + filename);
+  }
+
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2500);
+  }
+
+})();
+</script>
+</body>
+</html>
