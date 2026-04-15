@@ -42,12 +42,13 @@
     var BASE = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
 
     var BOOK_QUAD = [[165,39],[1361,39],[1361,1759],[165,1759]];
-
-    // iPad screen quad - pulled bottom up further to 1585, tightened for bezel
     var IPAD_QUAD = [[171,64],[1320,64],[1320,1592],[171,1592]];
-
-    // Border radius for the iPad screen (mimics real iPad rounded screen corners)
     var IPAD_SCREEN_RADIUS = 8;
+
+    // Spine region on book template (the visible edge to the right of the cover face)
+    // Runs from x=1361 (right edge of face) to the right side of the book
+    // and from y=39 (top of face) to y=1759 (bottom of face)
+    var SPINE_FACE_RIGHT = 1361;
 
     var HERO_W = 1500, HERO_H = 1395;
     var HERO_BOOK = { cx:520, cy:863, scale:0.512, rot:-10 };
@@ -95,20 +96,58 @@
       reader.readAsDataURL(file);
     }
 
-    // Draw a rounded rectangle path
-    function roundedRect(ctx, x, y, w, h, r) {
-      ctx.beginPath();
-      ctx.moveTo(x + r, y);
-      ctx.lineTo(x + w - r, y);
-      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-      ctx.lineTo(x + w, y + h - r);
-      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-      ctx.lineTo(x + r, y + h);
-      ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-      ctx.lineTo(x, y + r);
-      ctx.quadraticCurveTo(x, y, x + r, y);
-      ctx.closePath();
+    // Sample the dominant edge colour from the cover image
+    // Samples the left edge (which wraps around to become the spine)
+    function getCoverEdgeColor(img) {
+      var c = document.createElement('canvas');
+      c.width = img.width; c.height = img.height;
+      var ctx = c.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+
+      // Sample a strip along the left edge and the right edge
+      // The spine shows the colour that wraps around from the cover
+      // Sample 10px wide strips on both left and right edges, plus corners
+      var samples = [];
+      var strip = 10;
+      var data = ctx.getImageData(0, 0, img.width, img.height).data;
+
+      // Sample left edge
+      for (var y = 0; y < img.height; y += Math.max(1, Math.floor(img.height / 50))) {
+        for (var x = 0; x < strip; x++) {
+          var i = (y * img.width + x) * 4;
+          samples.push([data[i], data[i+1], data[i+2]]);
+        }
+      }
+      // Sample right edge
+      for (var y = 0; y < img.height; y += Math.max(1, Math.floor(img.height / 50))) {
+        for (var x = img.width - strip; x < img.width; x++) {
+          var i = (y * img.width + x) * 4;
+          samples.push([data[i], data[i+1], data[i+2]]);
+        }
+      }
+      // Sample top edge
+      for (var x = 0; x < img.width; x += Math.max(1, Math.floor(img.width / 50))) {
+        for (var y = 0; y < strip; y++) {
+          var i = (y * img.width + x) * 4;
+          samples.push([data[i], data[i+1], data[i+2]]);
+        }
+      }
+      // Sample bottom edge
+      for (var x = 0; x < img.width; x += Math.max(1, Math.floor(img.width / 50))) {
+        for (var y = img.height - strip; y < img.height; y++) {
+          var i = (y * img.width + x) * 4;
+          samples.push([data[i], data[i+1], data[i+2]]);
+        }
+      }
+
+      // Find the most common colour by averaging
+      // (simple average works well for solid-colour edges)
+      var rSum=0, gSum=0, bSum=0, n=samples.length;
+      for (var s=0; s<n; s++) { rSum+=samples[s][0]; gSum+=samples[s][1]; bSum+=samples[s][2]; }
+      return 'rgb('+Math.round(rSum/n)+','+Math.round(gSum/n)+','+Math.round(bSum/n)+')';
     }
+
+    function roundedRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();}
 
     function warp(ctx,img,quad){
       var N=12;
@@ -135,27 +174,18 @@
       ctx.fillStyle='rgba(0,0,0,1)';ctx.fill();ctx.restore();
     }
 
-    // Cut a rounded-rect quad from the canvas
-    function cutQuadRounded(ctx, quad, radius) {
-      var x = quad[0][0], y = quad[0][1];
-      var w = quad[1][0] - quad[0][0], h = quad[2][1] - quad[1][1];
-      ctx.save();
-      ctx.globalCompositeOperation = 'destination-out';
-      roundedRect(ctx, x, y, w, h, radius);
-      ctx.fillStyle = 'rgba(0,0,0,1)';
-      ctx.fill();
-      ctx.restore();
+    function cutQuadRounded(ctx,quad,radius){
+      var x=quad[0][0],y=quad[0][1],w=quad[1][0]-quad[0][0],h=quad[2][1]-quad[1][1];
+      ctx.save();ctx.globalCompositeOperation='destination-out';
+      roundedRect(ctx,x,y,w,h,radius);
+      ctx.fillStyle='rgba(0,0,0,1)';ctx.fill();ctx.restore();
     }
 
-    // Warp image into a quad, clipped to a rounded rectangle
-    function warpRounded(ctx, img, quad, radius) {
+    function warpRounded(ctx,img,quad,radius){
       ctx.save();
-      var x = quad[0][0], y = quad[0][1];
-      var w = quad[1][0] - quad[0][0], h = quad[2][1] - quad[1][1];
-      roundedRect(ctx, x, y, w, h, radius);
-      ctx.clip();
-      warp(ctx, img, quad);
-      ctx.restore();
+      var x=quad[0][0],y=quad[0][1],w=quad[1][0]-quad[0][0],h=quad[2][1]-quad[1][1];
+      roundedRect(ctx,x,y,w,h,radius);ctx.clip();
+      warp(ctx,img,quad);ctx.restore();
     }
 
     function generateAll(){
@@ -170,26 +200,167 @@
 
     function genBook(){
       var c=bookCanvas,ctx=c.getContext('2d'),w=c.width,h=c.height;
-      ctx.clearRect(0,0,w,h);warp(ctx,coverImg,BOOK_QUAD);
+      ctx.clearRect(0,0,w,h);
+
+      // Step 1: Sample the cover's edge colour for the spine
+      var spineColor = getCoverEdgeColor(coverImg);
+
+      // Step 2: Draw the cover warped into the face quad
+      warp(ctx,coverImg,BOOK_QUAD);
+
+      // Step 3: Prepare the template overlay
+      // First, tint the spine area of the template to match the cover colour.
+      // We do this by drawing the spine colour underneath the template,
+      // then cutting out the face quad, so the spine shows through in the right colour.
       var t=document.createElement('canvas');t.width=w;t.height=h;
-      var tc=t.getContext('2d');tc.drawImage(templateBook,0,0,w,h);cutQuad(tc,BOOK_QUAD);
-      ctx.drawImage(t,0,0);
+      var tc=t.getContext('2d');
+
+      // Fill the entire canvas with the spine colour first
+      // This will show through wherever the template is semi-transparent or
+      // after we cut out the face quad
+      tc.fillStyle = spineColor;
+      tc.fillRect(0, 0, w, h);
+
+      // Draw the template on top using 'destination-in' to keep only where template has alpha
+      // Actually, we need a different approach:
+      // 1. Draw template normally
+      // 2. For every pixel in the spine area, replace the colour with spineColor
+      //    but keep the original alpha (preserving highlights/shadows)
+
+      // Simpler approach: draw the template, then use 'source-atop' to paint
+      // the spine region with the cover colour while preserving the template's
+      // lighting/shadow detail via multiply blending.
+
+      // Simplest effective approach:
+      // Draw template, cut out face quad.
+      // Then underneath (behind the template), fill the spine area with cover colour.
+      // The template's spine has highlights/shadows that will overlay on top.
+
+      tc.drawImage(templateBook,0,0,w,h);
+      cutQuad(tc,BOOK_QUAD);
+
+      // Now recolour the spine area of the template.
+      // The spine in the template has a beige colour with lighting.
+      // We want to replace the base hue while keeping the lighting variation.
+      // Use 'multiply' blend mode with the cover colour on the spine area.
+      tc.save();
+      tc.globalCompositeOperation = 'multiply';
+      // Create a colour layer that only covers the spine area (right of face quad)
+      // Need to normalize: multiply works by multiplying each channel.
+      // For a dark cover (black), multiply will darken everything.
+      // For a light cover, it preserves.
+      // This won't work perfectly for all colours but handles dark covers well.
+
+      // Better: use 'source-atop' to replace colour while keeping alpha,
+      // then modulate with the original luminance.
+
+      // Actually the MOST reliable approach: sample the template spine pixels,
+      // compute the average brightness, and use that to create a colour-matched fill.
+      // But that's complex.
+
+      // Practical approach: fill behind the template overlay.
+      // The template overlay has semi-transparent spine pixels.
+      // If we put the cover colour BEHIND those pixels, it blends naturally.
+
+      // Let me restructure: create a spine-coloured background behind the template.
+      tc.restore();
+
+      // Rebuild the template overlay properly:
+      var t2 = document.createElement('canvas'); t2.width=w; t2.height=h;
+      var tc2 = t2.getContext('2d');
+
+      // First layer: fill spine area with cover colour
+      tc2.fillStyle = spineColor;
+      // The spine is to the right of x=1361, between the face quad edges
+      // But the spine is not a simple rectangle - it follows the 3D book shape.
+      // Fill the entire area, then the template alpha will mask it correctly.
+      tc2.fillRect(0, 0, w, h);
+
+      // Second layer: draw the template on top with source-atop
+      // This keeps the template's alpha channel but uses the fill colour
+      // where the template is opaque.
+      // Actually source-atop replaces colour completely. We want to BLEND.
+
+      // Let me just use the simple approach:
+      // Draw spine colour behind template, then template on top.
+      // The template's spine has highlights (lighter streaks) that will show on top.
+
+      // Reset and do it cleanly:
+      tc2.clearRect(0,0,w,h);
+
+      // Draw the spine colour as a base layer
+      tc2.fillStyle = spineColor;
+      tc2.fillRect(0, 0, w, h);
+
+      // Draw the template on top - the template's pixels will override
+      // But in the spine area, the template has the beige colour, which will cover our fill.
+      // That defeats the purpose.
+
+      // THE RIGHT WAY: Modify the template's spine pixels.
+      // Get the template image data, and for every pixel in the spine area,
+      // keep the luminance but replace the hue with the cover colour.
+
+      tc2.clearRect(0,0,w,h);
+      tc2.drawImage(templateBook, 0, 0, w, h);
+
+      // Get the template pixel data
+      var imgData = tc2.getImageData(0, 0, w, h);
+      var px = imgData.data;
+
+      // Parse the spine colour
+      var tempC = document.createElement('canvas'); tempC.width=1; tempC.height=1;
+      var tempCtx = tempC.getContext('2d');
+      tempCtx.fillStyle = spineColor;
+      tempCtx.fillRect(0,0,1,1);
+      var sc = tempCtx.getImageData(0,0,1,1).data;
+      var sR=sc[0], sG=sc[1], sB=sc[2];
+
+      // For every opaque pixel OUTSIDE the face quad (the spine, top, bottom edges),
+      // blend the pixel colour toward the spine colour.
+      // Use the original pixel's brightness to modulate the result.
+      for (var y=0; y<h; y++) {
+        for (var x=0; x<w; x++) {
+          var idx = (y * w + x) * 4;
+          var a = px[idx+3];
+          if (a < 10) continue; // skip transparent
+
+          // Check if this pixel is in the face quad area (skip those)
+          // Simple bounds check (the face is a rectangle)
+          if (x >= BOOK_QUAD[0][0] && x <= BOOK_QUAD[1][0] &&
+              y >= BOOK_QUAD[0][1] && y <= BOOK_QUAD[2][1]) continue;
+
+          // This pixel is in the spine/edge area. Recolour it.
+          var oR=px[idx], oG=px[idx+1], oB=px[idx+2];
+          // Calculate original luminance (0-1)
+          var lum = (0.299*oR + 0.587*oG + 0.114*oB) / 255;
+
+          // Apply luminance to the spine colour
+          px[idx]   = Math.min(255, Math.round(sR * lum));
+          px[idx+1] = Math.min(255, Math.round(sG * lum));
+          px[idx+2] = Math.min(255, Math.round(sB * lum));
+          // Keep original alpha
+        }
+      }
+
+      tc2.putImageData(imgData, 0, 0);
+
+      // Cut out the face quad so the warped cover shows through
+      cutQuad(tc2, BOOK_QUAD);
+
+      // Draw the recoloured template on top of the warped cover
+      ctx.drawImage(t2, 0, 0);
+
       c.style.display='block';bookPH.style.display='none';
     }
 
     function genIpad(){
       var c=ipadCanvas,ctx=c.getContext('2d'),w=c.width,h=c.height;
       ctx.clearRect(0,0,w,h);
-
-      // Warp cover with rounded corners to match iPad screen shape
       warpRounded(ctx,coverImg,IPAD_QUAD,IPAD_SCREEN_RADIUS);
-
-      // Template with rounded-rect quad cut out
       var t=document.createElement('canvas');t.width=w;t.height=h;
       var tc=t.getContext('2d');tc.drawImage(templateIpad,0,0,w,h);
       cutQuadRounded(tc,IPAD_QUAD,IPAD_SCREEN_RADIUS);
       ctx.drawImage(t,0,0);
-
       c.style.display='block';ipadPH.style.display='none';
     }
 
@@ -197,7 +368,6 @@
       var c=heroCanvas,ctx=c.getContext('2d');
       ctx.clearRect(0,0,HERO_W,HERO_H);
 
-      // 1. iPad mockup (back)
       ctx.save();
       ctx.translate(HERO_IPAD.cx,HERO_IPAD.cy);
       ctx.rotate(HERO_IPAD.rot*Math.PI/180);
@@ -205,10 +375,8 @@
       ctx.drawImage(ipadCanvas,-ipadCanvas.width/2,-ipadCanvas.height/2);
       ctx.restore();
 
-      // 2. Book shadow (between iPad and book)
       ctx.drawImage(heroShadow,0,0,HERO_W,HERO_H);
 
-      // 3. Book mockup (front)
       ctx.save();
       ctx.translate(HERO_BOOK.cx,HERO_BOOK.cy);
       ctx.rotate(HERO_BOOK.rot*Math.PI/180);
@@ -216,7 +384,6 @@
       ctx.drawImage(bookCanvas,-bookCanvas.width/2,-bookCanvas.height/2);
       ctx.restore();
 
-      // 4. AirPods + shadow (top)
       ctx.drawImage(heroAirpods,0,0,HERO_W,HERO_H);
 
       c.style.display='block';heroPH.style.display='none';
